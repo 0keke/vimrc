@@ -150,6 +150,11 @@ augroup END
 let g:lsp_settings = {
   \  'efm-langserver': {'disabled': v:false}
   \}
+
+let g:lsp_diagnostics_signs_error = {'text': ' '}
+let g:lsp_diagnostics_signs_warning = {'text': ' '}
+let g:lsp_diagnostics_signs_hint = {'text': ' '}
+let g:lsp_diagnostics_signs_information = {'text': ''}
 "}}}
 
 " Fern: {{{
