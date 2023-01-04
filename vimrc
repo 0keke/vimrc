@@ -147,14 +147,80 @@ augroup my_lsp
   autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
 
-let g:lsp_settings = {
-  \  'efm-langserver': {'disabled': v:false}
-  \}
+let g:lsp_diagnostics_virtual_text_prefix = '●'
+let g:lsp_diagnostics_virtual_text_align = 'after'
+let g:lsp_diagnostics_virtual_text_padding_left = 4
 
 let g:lsp_diagnostics_signs_error = {'text': ' '}
 let g:lsp_diagnostics_signs_warning = {'text': ' '}
 let g:lsp_diagnostics_signs_hint = {'text': ' '}
 let g:lsp_diagnostics_signs_information = {'text': ''}
+
+let g:lsp_settings = {
+  \ 'efm-langserver': {
+  \   'disabled': v:false
+  \ },
+  \ '*': {
+  \   'config': {
+  \     'symbol_kinds': {
+  \       '1': ' file',
+  \       '2': ' module',
+  \       '3': ' namespace',
+  \       '4': ' package',
+  \       '5': ' class',
+  \       '6': ' method',
+  \       '7': ' property',
+  \       '8': ' field',
+  \       '9': ' constructor',
+  \       '10': ' enum',
+  \       '11': ' interface',
+  \       '12': '⨕ function',
+  \       '13': ' variable',
+  \       '14': ' constant',
+  \       '15': 'string',
+  \       '16': 'number',
+  \       '17': 'boolean',
+  \       '18': 'array',
+  \       '19': 'object',
+  \       '20': 'key',
+  \       '21': 'null',
+  \       '22': ' enum member',
+  \       '23': 'פּ struct',
+  \       '24': '鬒 event',
+  \       '25': 'Ψ operator',
+  \       '26': 'Ψ type parameter'
+  \     },
+  \     'completion_item_kinds': {
+  \       '1': '♣ text',
+  \       '2': ' method',
+  \       '3': '⨕ function',
+  \       '4': ' constructor',
+  \       '5': ' field',
+  \       '6': ' variable',
+  \       '7': ' class',
+  \       '8': ' interface',
+  \       '9': ' module',
+  \       '10': ' property',
+  \       '11': ' unit',
+  \       '12': ' value',
+  \       '13': ' enum',
+  \       '14': ' keyword',
+  \       '15': ' snippet',
+  \       '16': ' color',
+  \       '17': ' file',
+  \       '18': '渚 reference',
+  \       '19': ' folder',
+  \       '20': ' enum member',
+  \       '21': ' constant',
+  \       '22': 'פּ struct',
+  \       '23': '鬒 event',
+  \       '24': 'Ψ operator',
+  \       '25': 'Ψ type parameter'
+  \     }
+  \   }
+  \ }
+  \}
+
 "}}}
 
 " Fern: {{{
@@ -232,6 +298,21 @@ try
 catch
   colorscheme habamax
 endtry
+
+hi link LspInformationHighlight DiagnosticUnderlineInfo
+hi link LspHintHighlight DiagnosticUnderlineHint
+hi link LspWarningHighlight  DiagnosticUnderlineWarn
+hi link LspErrorHighlight  DiagnosticUnderlineError
+
+hi link LspErrorVirtualText DiagnosticError
+hi link LspWarningVirtualText DiagnosticWarn
+hi link LspInformationVirtualText DiagnosticInfo
+hi link LspHintVirtualText  DiagnosticHint
+
+hi link LspErrorText DiagnosticSignError
+hi link LspWarningText DiagnosticSignWarn
+hi link LspInformationText DiagnosticSignInfo
+hi link LspHintText DiagnosticSignHint
 
 set secure
 " }}}
