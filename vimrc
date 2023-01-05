@@ -1,16 +1,27 @@
+" Options:{{{
+
+if &compatible
+  set nocompatible
+endif
+
 set encoding=utf-8
-scriptencoding utf-8
 set makeencoding=char
+scriptencoding utf-8
+
 let $XDG_CACHE_HOME = get(environ(), 'XDG_CACHE_HOME', expand('~/.cache'))
 let $VIMHOME = expand('<sfile>:p:h')
 let g:mapleader = "\<Space>"
 
-" Options:{{{
+set winaltkeys=yes
+set guioptions=mM
+set mouse=a
+set belloff=all
+set clipboard=unnamed
+
 if exists('&termguicolors')
   set termguicolors
 endif
 
-set clipboard=unnamed
 set listchars=tab:>-,extends:<,trail:-,eol:<
 
 " Specify number of spaces to use for each step of (auto)indent explicitly.
@@ -18,6 +29,8 @@ set listchars=tab:>-,extends:<,trail:-,eol:<
 set shiftround softtabstop=-1 shiftwidth=2 tabstop=2
 set expandtab
 
+set ruler
+set rulerformat=%{&fileencoding}/%{&fileformat}
 set showmatch matchtime=1
 set wildmenu
 set shortmess& shortmess-=S
@@ -132,14 +145,13 @@ function! s:on_lsp_buffer_enabled() abort
   nmap <buffer> gi <plug>(lsp-implementation)
   nmap <buffer> gt <plug>(lsp-type-definition)
   nmap <buffer> <leader>rn <plug>(lsp-rename)
-  nmap <buffer> [g <plug>(lsp-previous-diagnostic)
-  nmap <buffer> ]g <plug>(lsp-next-diagnostic)
+  nmap <buffer> [d <plug>(lsp-previous-diagnostic)
+  nmap <buffer> ]d <plug>(lsp-next-diagnostic)
   nmap <buffer> K <plug>(lsp-hover)
-  nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
-  nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
-
+  if &filetype !=# 'vim'
+    nmap <buffer> K <plug>(lsp-hover)
+  endif
   let g:lsp_format_sync_timeout = 1000
-  autocmd! BufWritePre *.rs,*.go call execute('LspDocumentFormatSync')
 endfunction
 
 augroup my_lsp
