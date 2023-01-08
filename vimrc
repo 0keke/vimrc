@@ -29,6 +29,8 @@ set listchars=tab:>-,extends:<,trail:-,eol:<
 set shiftround softtabstop=-1 shiftwidth=2 tabstop=2
 set expandtab
 
+set hlsearch incsearch
+
 set ruler
 set rulerformat=%{&fileencoding}/%{&fileformat}
 set showmatch matchtime=1
@@ -65,6 +67,9 @@ function! PackInit() abort
 
   call minpac#add('tyru/caw.vim')
   call minpac#add('machakann/vim-sandwich')
+
+  call minpac#add('kana/vim-operator-user')
+
   call minpac#add('kana/vim-textobj-entire')
   call minpac#add('kana/vim-textobj-user')
 
@@ -77,8 +82,7 @@ function! PackInit() abort
   call minpac#add('prabirshrestha/vim-lsp')
   call minpac#add('tsuyoshicho/vim-efm-langserver-settings')
 
-  " call minpac#add('ctrlpvim/ctrlp.vim')
-  " call minpac#add('0keke/ctrlp-command')
+  call minpac#add('t9md/vim-quickhl')
 
   " color scheme
   call minpac#add('NLKNguyen/papercolor-theme')
@@ -115,12 +119,6 @@ command! -nargs=1 -complete=custom,PackList
   \    minpac#getpluginfo(<q-args>).url)
 "}}}
 
-" Local Configuration:{{{
-if filereadable(expand('~/.vimrc.local'))
-  execute 'source' fnameescape(expand('~/.vimrc.local'))
-endif
-" }}}
-
 " Netrw: {{{
 let g:netrw_home = expand('$XDG_CACHE_HOME/netrw')
 " }}}
@@ -138,27 +136,31 @@ function! s:on_lsp_buffer_enabled() abort
   if exists('+tagfunc')
     setlocal tagfunc=lsp#tagfunc
   endif
+
+
+  nmap <buffer> <leader>cd <plug>(lsp-document-diagnostics)
+  nmap <buffer> <leader>cl <Cmd>LspInfo<CR>
   nmap <buffer> gd <plug>(lsp-definition)
-  nmap <buffer> gs <plug>(lsp-document-symbol-search)
-  nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
   nmap <buffer> gr <plug>(lsp-references)
-  nmap <buffer> gi <plug>(lsp-implementation)
+  nmap <buffer> gD <plug>(lsp-peek-declaration)
+  nmap <buffer> gI <plug>(lsp-implementation)
   nmap <buffer> gt <plug>(lsp-type-definition)
-  nmap <buffer> <leader>rn <plug>(lsp-rename)
+  nmap <buffer> K <plug>(lsp-hover)
+  nmap <buffer> gK <plug>(lsp-signature-help)
+
+  nmap <buffer> <leader>cr <plug>(lsp-rename)
+  nmap <buffer> <leader>cf <plug>(lsp-document-format)
   nmap <buffer> [d <plug>(lsp-previous-diagnostic)
   nmap <buffer> ]d <plug>(lsp-next-diagnostic)
-  nmap <buffer> K <plug>(lsp-hover)
+
+  nmap <buffer> gs <plug>(lsp-document-symbol-search)
+  nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
   if &filetype !=# 'vim'
     nmap <buffer> K <plug>(lsp-hover)
   endif
-  let g:lsp_format_sync_timeout = 1000
 endfunction
 
-augroup my_lsp
-  autocmd!
-  autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
-augroup END
-
+let g:lsp_format_sync_timeout = 1000
 let g:lsp_diagnostics_virtual_text_prefix = '●'
 let g:lsp_diagnostics_virtual_text_align = 'after'
 let g:lsp_diagnostics_virtual_text_padding_left = 4
@@ -167,6 +169,13 @@ let g:lsp_diagnostics_signs_error = {'text': ' '}
 let g:lsp_diagnostics_signs_warning = {'text': ' '}
 let g:lsp_diagnostics_signs_hint = {'text': ' '}
 let g:lsp_diagnostics_signs_information = {'text': ''}
+
+command! LspDebug let lsp_log_verbose=1 | let lsp_log_file = expand('~/lsp.log')
+
+augroup my_lsp
+  autocmd!
+  autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
 
 let g:lsp_settings = {
   \ 'efm-langserver': {
@@ -270,6 +279,9 @@ command! -nargs=0 Nohlsearch let @/ = ''
 "}}}
 
 " KeyMapping:{{{
+
+map H <Plug>(operator-quickhl-manual-this-motion)
+
 inoremap <C-u> <C-g>u<C-u>
 
 " c_CTRL-X
@@ -325,6 +337,10 @@ hi link LspErrorText DiagnosticSignError
 hi link LspWarningText DiagnosticSignWarn
 hi link LspInformationText DiagnosticSignInfo
 hi link LspHintText DiagnosticSignHint
+
+if filereadable(expand('~/.vimrc.local'))
+  execute 'source' fnameescape(expand('~/.vimrc.local'))
+endif
 
 set secure
 " }}}
