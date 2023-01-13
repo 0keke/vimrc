@@ -63,6 +63,8 @@ function! PackInit() abort
   " Additional plugins here.
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('tyru/open-browser.vim')
+
+  " https://twitter.com/mattn_jp/status/1526718582264320000
   call minpac#add('rbtnn/vim-ambiwidth')
 
   call minpac#add('tyru/caw.vim')
@@ -83,6 +85,8 @@ function! PackInit() abort
   call minpac#add('tsuyoshicho/vim-efm-langserver-settings')
 
   call minpac#add('t9md/vim-quickhl')
+  call minpac#add('lambdalisue/gina.vim')
+  call minpac#add('previm/previm')
 
   " color scheme
   call minpac#add('NLKNguyen/papercolor-theme')
