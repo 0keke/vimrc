@@ -65,7 +65,7 @@ function! PackInit() abort
   call minpac#add('tyru/open-browser.vim')
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
-  call minpac#add('rbtnn/vim-ambiwidth')
+  " call minpac#add('rbtnn/vim-ambiwidth')
 
   call minpac#add('tyru/caw.vim')
   call minpac#add('machakann/vim-sandwich')
@@ -92,7 +92,48 @@ function! PackInit() abort
   call minpac#add('NLKNguyen/papercolor-theme')
   call minpac#add('cocopon/iceberg.vim')
   call minpac#add('sainnhe/edge')
-  call minpac#add('folke/tokyonight.nvim')
+  call minpac#add('EdenEast/nightfox.nvim')
+
+  " copmpletion
+  call minpac#add('prabirshrestha/asyncomplete.vim', {'type': 'opt'})
+  call minpac#add('prabirshrestha/asyncomplete-lsp.vim', {'type': 'opt'})
+
+  " ddu
+  call minpac#add('Milly/ddu-filter-kensaku')
+  " call minpac#add('Shougo/ddu-column-filename')
+  call minpac#add('Shougo/ddu-commands.vim')
+  call minpac#add('Shougo/ddu-filter-matcher_substring')
+  " call minpac#add('Shougo/ddu-filter-sorter_alpha')
+  call minpac#add('Shougo/ddu-kind-file')
+  " call minpac#add('Shougo/ddu-kind-word')
+  call minpac#add('Shougo/ddu-source-action')
+  " call minpac#add('Shougo/ddu-source-file')
+  call minpac#add('Shougo/ddu-source-file_rec')
+  call minpac#add('Shougo/ddu-source-line')
+  " call minpac#add('Shougo/ddu-source-register')
+  call minpac#add('Shougo/ddu-ui-ff')
+  call minpac#add('Shougo/ddu.vim')
+  call minpac#add('kuuote/ddu-source-mr')
+  " call minpac#add('matsui54/ddu-source-command_history')
+  " call minpac#add('matsui54/ddu-vim-ui-select')
+  " call minpac#add('mikanIchinose/ddu-source-markdown')
+  call minpac#add('matsui54/ddu-source-file_external')
+  call minpac#add('shun/ddu-source-rg')
+
+  " Denops
+  " call minpac#add('lambdalisue/askpass.vim')
+  call minpac#add('lambdalisue/gin.vim')
+  " call minpac#add('lambdalisue/guise.vim')
+  call minpac#add('lambdalisue/kensaku.vim')
+  " call minpac#add('skanehira/denops-translate.vim')
+  " call minpac#add('vim-denops/denops-shared-server.vim')
+  call minpac#add('vim-denops/denops.vim')
+  call minpac#add('yuki-yano/fuzzy-motion.vim')
+  call minpac#add('lambdalisue/mr.vim')
+
+  call minpac#add('ctrlpvim/ctrlp.vim')
+  call minpac#add('ompugao/ctrlp-kensaku')
+  call minpac#add('halkn/ctrlp-ripgrep')
 endfunction
 
 function! s:ensure_minpac() abort
@@ -149,7 +190,9 @@ function! s:on_lsp_buffer_enabled() abort
   nmap <buffer> gD <plug>(lsp-peek-declaration)
   nmap <buffer> gI <plug>(lsp-implementation)
   nmap <buffer> gt <plug>(lsp-type-definition)
-  nmap <buffer> K <plug>(lsp-hover)
+  if &filetype != 'vim'
+    nmap <buffer> K <plug>(lsp-hover)
+  endif
   nmap <buffer> gK <plug>(lsp-signature-help)
 
   nmap <buffer> <leader>cr <plug>(lsp-rename)
@@ -169,9 +212,9 @@ let g:lsp_diagnostics_virtual_text_prefix = '●'
 let g:lsp_diagnostics_virtual_text_align = 'after'
 let g:lsp_diagnostics_virtual_text_padding_left = 4
 
-let g:lsp_diagnostics_signs_error = {'text': ' '}
-let g:lsp_diagnostics_signs_warning = {'text': ' '}
-let g:lsp_diagnostics_signs_hint = {'text': ' '}
+let g:lsp_diagnostics_signs_error = {'text': ''}
+let g:lsp_diagnostics_signs_warning = {'text': ''}
+let g:lsp_diagnostics_signs_hint = {'text': ''}
 let g:lsp_diagnostics_signs_information = {'text': ''}
 
 command! LspDebug let lsp_log_verbose=1 | let lsp_log_file = expand('~/lsp.log')
@@ -259,6 +302,194 @@ augroup my-glyph-palette
   autocmd! *
     autocmd FileType fern call glyph_palette#apply()
 augroup END
+" }}}
+
+" DDU: {{{
+call ddu#custom#patch_global(#{
+  \   ui: 'ff',
+  \   souces: [{'name': 'file_rec', 'params': {}}],
+  \   sourceOptions: #{
+  \     _: {
+  \       'matchers': ['matcher_substring'],
+  \     },
+  \     line: {
+  \       'matchers': ['matcher_kensaku'],
+  \     },
+  \     file_external: #{
+  \       matchers: ['matcher_substring'],
+  \     },
+  \   },
+  \   kindOptions: #{
+  \     action: #{
+  \       defaultAction: 'do',
+  \     },
+  \     file: #{
+  \       defaultAction: 'open',
+  \     },
+  \   },
+  \   filterParams: #{
+  \     matcher_substring: #{
+  \       highlightMatched: 'Search',
+  \     },
+  \     matcher_kensaku: #{
+  \       highlightMatched: 'Search',
+  \     },
+  \   },
+  \   sourceParams: #{
+  \     file_external: #{
+  \       cmd: ['rg', '--files', '--glob', '!.git',
+  \               '--color', 'never', '--no-messages'],
+  \           updateItems: 50000,
+  \     },
+  \   },
+  \ })
+
+nnoremap <silent> <Leader>ff <Cmd>call ddu#start(#{
+  \   name: 'file-rec',
+  \   sources: [#{
+  \     name: 'file_rec',
+  \   }],
+  \   uiParams: #{
+  \     ff: #{
+  \       startFilter: v:true
+  \     },
+  \   },
+  \ })<CR>
+nnoremap <Leader>dl <Cmd>call ddu#start(#{
+  \   name: 'Line',
+  \   sources: [#{
+  \     name: 'line',
+  \   }],
+  \   uiParams: #{
+  \     ff: #{
+  \       startFilter: v:true
+  \     },
+  \   },
+  \ })<CR>
+
+nnoremap <silent> <Leader>/ <Cmd>call ddu#start({
+  \ 'name': 'search',
+  \ 'sources': [{
+  \   'name': 'rg',
+  \   'params': {
+  \     'input': input('Pattern: '),
+  \   },
+  \ }],
+  \ 'uiParams': {
+  \   'ff': {
+  \     'ignoreEmpty': v:true,
+  \   },
+  \ },
+  \})<CR>
+
+nnoremap <silent> <Leader>d, <Cmd>call ddu#start(#{
+  \ name: 'mrw',
+  \ sources: [{
+  \   'name': 'mr',
+  \   'params': {
+  \     'kind': 'mrw',
+  \   },
+  \ }],
+  \ uiParams: #{
+  \   ff: #{
+  \     startFilter: v:true
+  \   },
+  \ uiOptions: {
+  \   'ff': {
+  \     'defaultAction': 'cd',
+  \   },
+  \ },
+  \})<CR>
+nnoremap <silent> <Leader>dmr <Cmd>call ddu#start({
+  \ 'name': 'mrr',
+  \ 'sources': [{
+  \   'name': 'mr',
+  \   'params': {
+  \     'kind': 'mrr',
+  \   },
+  \ }],
+  \ 'uiOptions': {
+  \   'ff': {
+  \     'defaultAction': 'cd',
+  \   },
+  \ },
+  \})<CR>
+nnoremap <silent> <Leader>dd <Cmd>call ddu#start(#{
+  \ name: 'dotfiles',
+  \ sources: [#{
+  \   name: 'file_rec',
+  \   params: #{
+  \     ignoredDirectories: [
+  \       '.git',
+  \       'pack',
+  \     ],
+  \   },
+  \   options: #{
+  \     path: expand('~/.vim')
+  \   },
+  \ }],
+  \ uiParams: #{
+  \   ff: #{
+  \     startFilter: v:true
+  \   },
+  \ },
+  \})<CR>
+
+function! s:ddu_execute(expr) abort
+  if !exists('g:ddu#ui#ff#_filter_parent_winid')
+    return
+  endif
+  call win_execute(g:ddu#ui#ff#_filter_parent_winid, a:expr)
+endfunction
+
+function! s:my_ddu_ff_filter()
+  inoremap <buffer> <CR> <Cmd>call ddu#ui#ff#do_action('itemAction')<CR>
+  " use <Esc> to exit from insert mode.
+  inoremap <buffer> <Esc> <Esc><Cmd>call ddu#ui#ff#close()<CR>
+  nnoremap <buffer> <Esc> <Cmd>call ddu#ui#ff#close()<CR>
+  nnoremap <buffer> q <Cmd>close<CR>
+
+  inoremap <buffer> <C-g> <Cmd>call <SID>ddu_execute('normal! j')<CR>
+  inoremap <buffer> <C-n> <Cmd>call <SID>ddu_execute('normal! j')<CR>
+  inoremap <buffer> <C-t> <Cmd>call <SID>ddu_execute('normal! k')<CR>
+  inoremap <buffer> <C-p> <Cmd>call <SID>ddu_execute('normal! k')<CR>
+  inoremap <buffer> <C-u> <Cmd>call <SID>ddu_execute('normal! \<C-u>')<CR>
+  inoremap <buffer> <C-d> <Cmd>call <SID>ddu_execute('normal! \<C-d>')<CR>
+endfunction
+
+function! s:my_ddu_ff()
+  setlocal cursorline
+  nnoremap <buffer> a <Cmd>call ddu#ui#ff#do_action('chooseAction')<CR>
+  nnoremap <buffer> <CR> <Cmd>call ddu#ui#ff#do_action('itemAction')<CR>
+  nnoremap <buffer> i    <Cmd>call ddu#ui#ff#do_action('openFilterWindow')<CR>
+  nnoremap <buffer> <Esc> <Cmd>call ddu#ui#ff#do_action('quit')<CR>
+  nnoremap <buffer> q    <Cmd>call ddu#ui#ff#do_action('quit')<CR>
+  nnoremap <buffer> p <Cmd>call ddu#ui#ff#do_action('preview')<CR>
+endfunction
+
+augroup my-ddu
+  autocmd!
+  autocmd FileType ddu-ff call s:my_ddu_ff()
+  autocmd FileType ddu-ff-filter call s:my_ddu_ff_filter()
+augroup END
+
+" }}}
+
+" FuzzyMotion: {{{
+nnoremap <Leader><Leader> <Cmd>FuzzyMotion<CR>
+
+" Enable kensaku.vim matcher
+let g:fuzzy_motion_matchers = ['fzf', 'kensaku']
+
+" Disable word split feature
+let g:fuzzy_motion_word_filter_regexp_list = []
+" }}}
+
+" CtrlP {{{
+let g:ctrlp_match_func = {'match': 'ctrlp_kensaku#matcher'}
+nnoremap <Space>pf <Cmd>CtrlP<CR>
+nnoremap <Space>pl <Cmd>CtrlPLine<CR>
+nnoremap <Space>pg <Cmd>CtrlPRg<CR>
 " }}}
 
 " Misc:{{{
