@@ -422,6 +422,7 @@ nnoremap <silent> <Leader>d, <Cmd>call ddu#start(#{
   \     ff: #{
   \       startFilter: v:true
   \     },
+  \   },
   \   uiOptions: #{
   \     ff: #{
   \       defaultAction: 'cd',
