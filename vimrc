@@ -50,6 +50,26 @@ if has('viminfo')
 endif
 
 let g:vim_indent_cont = &g:shiftwidth
+
+if executable('rg')
+  set grepprg=rg\ --vimgrep
+  set grepformat=%f:%l:%c:%m,%f:%l:%m,%f:%l%m,%f\ %l%m
+endif
+
+" Grep with <Leader>gg {{{
+function! s:grep(bang, query) abort
+  let query = empty(a:query) ? input('grep: ') : a:query
+  if empty(query)
+    redraw
+    return
+  endif
+  execute printf('silent grep%s %s .', a:bang, escape(query, ' '))
+endfunction
+nnoremap <silent> <Leader>gg :<C-u>call <SID>grep('', '')<CR>
+command! -nargs=* -bang Grep call s:grep(<q-bang>, <q-args>)
+
+" }}}
+
 "}}}
 
 " Plugins:{{{
@@ -79,6 +99,7 @@ function! PackInit() abort
   call minpac#add('lambdalisue/nerdfont.vim')
   call minpac#add('lambdalisue/fern-renderer-nerdfont.vim')
   call minpac#add('lambdalisue/glyph-palette.vim')
+  call minpac#add('lambdalisue/fern-hijack.vim')
 
   call minpac#add('mattn/vim-lsp-settings')
   call minpac#add('prabirshrestha/vim-lsp')
@@ -134,6 +155,12 @@ function! PackInit() abort
   call minpac#add('ctrlpvim/ctrlp.vim')
   call minpac#add('ompugao/ctrlp-kensaku')
   call minpac#add('halkn/ctrlp-ripgrep')
+
+  call minpac#add('https://github.com/lambdalisue/fin.vim')
+  call minpac#add('https://github.com/bfrg/vim-qf-preview')
+
+  call minpac#add('tyru/restart.vim')
+  call minpac#add('mattn/vim-sonictemplate')
 endfunction
 
 function! s:ensure_minpac() abort
@@ -307,7 +334,7 @@ augroup END
 " DDU: {{{
 call ddu#custom#patch_global(#{
   \   ui: 'ff',
-  \   souces: [{'name': 'file_rec', 'params': {}}],
+  \   sources: [{'name': 'file_rec', 'params': {}}],
   \   sourceOptions: #{
   \     _: {
   \       'matchers': ['matcher_substring'],
@@ -355,6 +382,7 @@ nnoremap <silent> <Leader>ff <Cmd>call ddu#start(#{
   \     },
   \   },
   \ })<CR>
+
 nnoremap <Leader>dl <Cmd>call ddu#start(#{
   \   name: 'Line',
   \   sources: [#{
@@ -367,73 +395,75 @@ nnoremap <Leader>dl <Cmd>call ddu#start(#{
   \   },
   \ })<CR>
 
-nnoremap <silent> <Leader>/ <Cmd>call ddu#start({
-  \ 'name': 'search',
-  \ 'sources': [{
-  \   'name': 'rg',
-  \   'params': {
-  \     'input': input('Pattern: '),
+nnoremap <silent> <Leader>dg <Cmd>call ddu#start(#{
+  \   name: 'search',
+  \   sources: [#{
+  \     name: 'rg',
+  \     params: #{
+  \       input: input('grep: '),
+  \     },
+  \   }],
+  \   uiParams: #{
+  \     ff: #{
+  \       ignoreEmpty: v:true,
+  \     },
   \   },
-  \ }],
-  \ 'uiParams': {
-  \   'ff': {
-  \     'ignoreEmpty': v:true,
-  \   },
-  \ },
-  \})<CR>
+  \ })<CR>
 
 nnoremap <silent> <Leader>d, <Cmd>call ddu#start(#{
-  \ name: 'mrw',
-  \ sources: [{
-  \   'name': 'mr',
-  \   'params': {
-  \     'kind': 'mrw',
+  \   name: 'mrw',
+  \   sources: [#{
+  \     name: 'mr',
+  \     params: #{
+  \       kind: 'mrw',
+  \     },
+  \   }],
+  \   uiParams: #{
+  \     ff: #{
+  \       startFilter: v:true
+  \     },
+  \   uiOptions: #{
+  \     ff: #{
+  \       defaultAction: 'cd',
+  \     },
   \   },
-  \ }],
-  \ uiParams: #{
-  \   ff: #{
-  \     startFilter: v:true
+  \ })<CR>
+
+nnoremap <silent> <Leader>dmr <Cmd>call ddu#start(#{
+  \   name: 'mrr',
+  \   sources: [#{
+  \     name: 'mr',
+  \     params: #{
+  \       kind: 'mrr',
+  \     },
+  \   }],
+  \   uiOptions: #{
+  \     ff: #{
+  \       defaultAction: 'cd',
+  \     },
   \   },
-  \ uiOptions: {
-  \   'ff': {
-  \     'defaultAction': 'cd',
-  \   },
-  \ },
-  \})<CR>
-nnoremap <silent> <Leader>dmr <Cmd>call ddu#start({
-  \ 'name': 'mrr',
-  \ 'sources': [{
-  \   'name': 'mr',
-  \   'params': {
-  \     'kind': 'mrr',
-  \   },
-  \ }],
-  \ 'uiOptions': {
-  \   'ff': {
-  \     'defaultAction': 'cd',
-  \   },
-  \ },
-  \})<CR>
+  \ })<CR>
+
 nnoremap <silent> <Leader>dd <Cmd>call ddu#start(#{
-  \ name: 'dotfiles',
-  \ sources: [#{
-  \   name: 'file_rec',
-  \   params: #{
-  \     ignoredDirectories: [
-  \       '.git',
-  \       'pack',
-  \     ],
+  \   name: 'dotfiles',
+  \   sources: [#{
+  \     name: 'file_rec',
+  \     params: #{
+  \       ignoredDirectories: [
+  \         '.git',
+  \         'pack',
+  \       ],
+  \     },
+  \     options: #{
+  \       path: expand('~/.vim')
+  \     },
+  \   }],
+  \   uiParams: #{
+  \     ff: #{
+  \       startFilter: v:true
+  \     },
   \   },
-  \   options: #{
-  \     path: expand('~/.vim')
-  \   },
-  \ }],
-  \ uiParams: #{
-  \   ff: #{
-  \     startFilter: v:true
-  \   },
-  \ },
-  \})<CR>
+  \ })<CR>
 
 function! s:ddu_execute(expr) abort
   if !exists('g:ddu#ui#ff#_filter_parent_winid')
@@ -491,6 +521,27 @@ nnoremap <Space>pf <Cmd>CtrlP<CR>
 nnoremap <Space>pl <Cmd>CtrlPLine<CR>
 nnoremap <Space>pg <Cmd>CtrlPRg<CR>
 " }}}
+
+" Gina: {{{
+" TODO: 2. gina.vim
+nnoremap <silent> <Leader>aa :<C-u>Gina status<CR>
+" nnoremap <silent> <Leader>aa :<C-u>GinaPreview<CR>
+nnoremap <silent> <Leader>aA :<C-u>Gina changes HEAD<CR>
+nnoremap <silent> <Leader>ac :<C-u>Gina commit<CR>
+nnoremap <silent> <Leader>aC :<C-u>Gina commit --amend<CR>
+nnoremap <silent> <Leader>ab :<C-u>Gina branch -av<CR>
+nnoremap <silent> <Leader>at :<C-u>Gina tag<CR>
+nnoremap <silent> <Leader>ag :<C-u>Gina grep<CR>
+nnoremap <silent> <Leader>aq :<C-u>Gina qrep<CR>
+nnoremap <silent> <Leader>ad :<C-u>Gina changes origin/HEAD...<CR>
+nnoremap <silent> <Leader>ah :<C-u>Gina log --graph<CR>
+nnoremap <silent> <Leader>aH :<C-u>Gina log --graph --all<CR>
+nnoremap <silent> <Leader>al :<C-u>Gina log<CR>
+nnoremap <silent> <Leader>aL :<C-u>Gina log :%<CR>
+nnoremap <silent> <Leader>af :<C-u>Gina ls<CR>
+nnoremap <silent> <Leader>ars :<C-u>Gina show <C-r><C-w><CR>
+nnoremap <silent> <Leader>arc :<C-u>Gina changes <C-r><C-w><CR>
+"}}}
 
 " Misc:{{{
 " Ref: https://github.com/koron/vim-kaoriya/blob/master/kaoriya/vim/plugins/kaoriya/plugin/cmdex.vim
