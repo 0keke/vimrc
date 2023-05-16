@@ -85,7 +85,7 @@ function! PackInit() abort
   call minpac#add('tyru/open-browser.vim')
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
-  " call minpac#add('rbtnn/vim-ambiwidth')
+  call minpac#add('rbtnn/vim-ambiwidth')
 
   call minpac#add('tyru/caw.vim')
   call minpac#add('machakann/vim-sandwich')
