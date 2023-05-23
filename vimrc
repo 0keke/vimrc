@@ -212,7 +212,7 @@ function! s:on_lsp_buffer_enabled() abort
 
   nmap <buffer> <leader>cd <plug>(lsp-document-diagnostics)
   nmap <buffer> <leader>cl <Cmd>LspInfo<CR>
-  nmap <buffer> gd <plug>(lsp-definition)
+  nmap <buffer> <leader>ld <plug>(lsp-definition)
   nmap <buffer> gr <plug>(lsp-references)
   nmap <buffer> gD <plug>(lsp-peek-declaration)
   nmap <buffer> gI <plug>(lsp-implementation)
