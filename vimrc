@@ -319,6 +319,15 @@ nnoremap <Space>pl <Cmd>CtrlPLine<CR>
 nnoremap <Space>pg <Cmd>CtrlPRg<CR>
 " }}}
 
+" vim-qf-preview {{{
+
+augroup qfpreview
+  autocmd!
+  autocmd FileType qf nmap <buffer> p <plug>(qf-preview-open)
+augroup END
+
+" }}}
+
 " Gina: {{{
 " TODO: 2. gina.vim
 nnoremap <silent> <Leader>aa :<C-u>Gina status<CR>
@@ -394,6 +403,10 @@ if has('win32')
   tnoremap <silent><nowait><C-a> <Home>
   tnoremap <silent><nowait><C-u> <Esc>
 endif
+
+nnoremap <silent><C-j> <Cmd>cnext \| normal zz<CR>
+nnoremap <silent><C-k> <Cmd>cprevious \| normal zz<CR>
+
 "}}}
 
 " END:{{{
