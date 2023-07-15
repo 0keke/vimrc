@@ -180,26 +180,14 @@ function! s:on_lsp_buffer_enabled() abort
     setlocal tagfunc=lsp#tagfunc
   endif
 
-
-  nmap <buffer> <leader>cd <plug>(lsp-document-diagnostics)
-  nmap <buffer> <leader>cl <Cmd>LspInfo<CR>
-  nmap <buffer> <leader>ld <plug>(lsp-definition)
-  nmap <buffer> gr <plug>(lsp-references)
-  nmap <buffer> gD <plug>(lsp-peek-declaration)
-  nmap <buffer> gI <plug>(lsp-implementation)
-  nmap <buffer> gt <plug>(lsp-type-definition)
   if &filetype != 'vim'
     nmap <buffer> K <plug>(lsp-hover)
   endif
   nmap <buffer> gK <plug>(lsp-signature-help)
 
-  nmap <buffer> <leader>cr <plug>(lsp-rename)
-  nmap <buffer> <leader>cf <plug>(lsp-document-format)
   nmap <buffer> [d <plug>(lsp-previous-diagnostic)
   nmap <buffer> ]d <plug>(lsp-next-diagnostic)
 
-  nmap <buffer> gs <plug>(lsp-document-symbol-search)
-  nmap <buffer> gS <plug>(lsp-workspace-symbol-search)
   if &filetype !=# 'vim'
     nmap <buffer> K <plug>(lsp-hover)
   endif
