@@ -57,6 +57,7 @@ if executable('rg')
 endif
 
 " Grep with <Leader>gg {{{
+
 function! s:grep(bang, query) abort
   let query = empty(a:query) ? input('grep: ') : a:query
   if empty(query)
@@ -120,25 +121,17 @@ function! PackInit() abort
   call minpac#add('prabirshrestha/asyncomplete-lsp.vim', {'type': 'opt'})
 
   " Denops
-  " call minpac#add('lambdalisue/askpass.vim')
   call minpac#add('lambdalisue/gin.vim')
-  " call minpac#add('lambdalisue/guise.vim')
   call minpac#add('lambdalisue/kensaku.vim')
-  " call minpac#add('skanehira/denops-translate.vim')
-  " call minpac#add('vim-denops/denops-shared-server.vim')
   call minpac#add('vim-denops/denops.vim')
   call minpac#add('yuki-yano/fuzzy-motion.vim')
-  call minpac#add('lambdalisue/mr.vim')
 
   call minpac#add('ctrlpvim/ctrlp.vim')
   call minpac#add('ompugao/ctrlp-kensaku')
   call minpac#add('halkn/ctrlp-ripgrep')
 
-  call minpac#add('https://github.com/lambdalisue/fin.vim')
-  call minpac#add('https://github.com/bfrg/vim-qf-preview')
-
+  call minpac#add('bfrg/vim-qf-preview')
   call minpac#add('tyru/restart.vim')
-  call minpac#add('mattn/vim-sonictemplate')
 endfunction
 
 function! s:ensure_minpac() abort
