@@ -113,6 +113,9 @@ function! PackInit() abort
   call minpac#add('lambdalisue/kensaku.vim')
   call minpac#add('vim-denops/denops.vim')
   call minpac#add('yuki-yano/fuzzy-motion.vim')
+
+  call minpac#add('junegunn/fzf')
+  call minpac#add('junegunn/fzf.vim')
 endfunction
 
 function! s:ensure_minpac() abort
@@ -397,21 +400,6 @@ try
 catch
   colorscheme habamax
 endtry
-
-hi link LspInformationHighlight DiagnosticUnderlineInfo
-hi link LspHintHighlight DiagnosticUnderlineHint
-hi link LspWarningHighlight  DiagnosticUnderlineWarn
-hi link LspErrorHighlight  DiagnosticUnderlineError
-
-hi link LspErrorVirtualText DiagnosticError
-hi link LspWarningVirtualText DiagnosticWarn
-hi link LspInformationVirtualText DiagnosticInfo
-hi link LspHintVirtualText  DiagnosticHint
-
-hi link LspErrorText DiagnosticSignError
-hi link LspWarningText DiagnosticSignWarn
-hi link LspInformationText DiagnosticSignInfo
-hi link LspHintText DiagnosticSignHint
 
 if filereadable(expand('~/.vimrc.local'))
   execute 'source' fnameescape(expand('~/.vimrc.local'))
