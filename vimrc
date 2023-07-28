@@ -56,21 +56,6 @@ if executable('rg')
   set grepformat=%f:%l:%c:%m,%f:%l:%m,%f:%l%m,%f\ %l%m
 endif
 
-" Grep with <Leader>gg {{{
-
-function! s:grep(bang, query) abort
-  let query = empty(a:query) ? input('grep: ') : a:query
-  if empty(query)
-    redraw
-    return
-  endif
-  execute printf('silent grep%s %s .', a:bang, escape(query, ' '))
-endfunction
-nnoremap <silent> <Leader>gg :<C-u>call <SID>grep('', '')<CR>
-command! -nargs=* -bang Grep call s:grep(<q-bang>, <q-args>)
-
-" }}}
-
 "}}}
 
 " Plugins:{{{
@@ -93,14 +78,15 @@ function! PackInit() abort
 
   call minpac#add('kana/vim-operator-user')
 
-  call minpac#add('kana/vim-textobj-entire')
+  call minpac#add('kana/vim-operator-user')
   call minpac#add('kana/vim-textobj-user')
+  call minpac#add('haya14busa/vim-operator-flashy')
 
-  call minpac#add('lambdalisue/fern.vim')
-  call minpac#add('lambdalisue/nerdfont.vim')
+  " call minpac#add('lambdalisue/fern-hijack.vim')
   call minpac#add('lambdalisue/fern-renderer-nerdfont.vim')
+  call minpac#add('lambdalisue/fern.vim')
   call minpac#add('lambdalisue/glyph-palette.vim')
-  call minpac#add('lambdalisue/fern-hijack.vim')
+  call minpac#add('lambdalisue/nerdfont.vim')
 
   call minpac#add('mattn/vim-lsp-settings')
   call minpac#add('prabirshrestha/vim-lsp')
@@ -109,6 +95,8 @@ function! PackInit() abort
   call minpac#add('t9md/vim-quickhl')
   call minpac#add('lambdalisue/gina.vim')
   call minpac#add('previm/previm')
+  call minpac#add('ntpeters/vim-better-whitespace')
+  call minpac#add('bfrg/vim-qf-preview')
 
   " color scheme
   call minpac#add('NLKNguyen/papercolor-theme')
@@ -125,13 +113,6 @@ function! PackInit() abort
   call minpac#add('lambdalisue/kensaku.vim')
   call minpac#add('vim-denops/denops.vim')
   call minpac#add('yuki-yano/fuzzy-motion.vim')
-
-  call minpac#add('ctrlpvim/ctrlp.vim')
-  call minpac#add('ompugao/ctrlp-kensaku')
-  call minpac#add('halkn/ctrlp-ripgrep')
-
-  call minpac#add('bfrg/vim-qf-preview')
-  call minpac#add('tyru/restart.vim')
 endfunction
 
 function! s:ensure_minpac() abort
@@ -160,6 +141,7 @@ command! -nargs=1 -complete=custom,PackList
 command! -nargs=1 -complete=custom,PackList
   \ PackOpenUrl call PackInit() | call openbrowser#open(
   \    minpac#getpluginfo(<q-args>).url)
+
 "}}}
 
 " Netrw: {{{
@@ -300,13 +282,6 @@ let g:fuzzy_motion_matchers = ['fzf', 'kensaku']
 let g:fuzzy_motion_word_filter_regexp_list = []
 " }}}
 
-" CtrlP {{{
-let g:ctrlp_match_func = {'match': 'ctrlp_kensaku#matcher'}
-nnoremap <Space>pf <Cmd>CtrlP<CR>
-nnoremap <Space>pl <Cmd>CtrlPLine<CR>
-nnoremap <Space>pg <Cmd>CtrlPRg<CR>
-" }}}
-
 " vim-qf-preview {{{
 
 augroup qfpreview
@@ -362,6 +337,9 @@ command! -nargs=0 Nohlsearch let @/ = ''
 
 map H <Plug>(operator-quickhl-manual-this-motion)
 
+map  <silent>y   <Plug>(operator-flashy)
+nmap <silent>Y   <Plug>(operator-flashy)$
+
 inoremap <C-u> <C-g>u<C-u>
 
 " c_CTRL-X
@@ -394,6 +372,19 @@ endif
 
 nnoremap <silent><C-j> <Cmd>cnext \| normal zz<CR>
 nnoremap <silent><C-k> <Cmd>cprevious \| normal zz<CR>
+
+" Grep with <Leader>gg {{{
+function! s:grep(bang, query) abort
+  let query = empty(a:query) ? input('grep: ') : a:query
+  if empty(query)
+    redraw
+    return
+  endif
+  execute printf('silent grep%s %s .', a:bang, escape(query, ' '))
+endfunction
+nnoremap <silent> <Leader>gg :<C-u>call <SID>grep('', '')<CR>
+command! -nargs=* -bang Grep call s:grep(<q-bang>, <q-args>)
+" }}}
 
 "}}}
 
