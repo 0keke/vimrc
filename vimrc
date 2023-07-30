@@ -52,8 +52,13 @@ endif
 let g:vim_indent_cont = &g:shiftwidth
 
 if executable('rg')
-  set grepprg=rg\ --vimgrep
-  set grepformat=%f:%l:%c:%m,%f:%l:%m,%f:%l%m,%f\ %l%m
+  if executable('jq')
+    let &grepprg = 'rg --json $* \| jq -r ''select(.type=="match")\|.data as $data\|$data.submatches[]\|"\($data.path.text):\($data.line_number):\(.start+1):\(.end+1):\($data.lines.text//""\|sub("\n$";""))"'''
+    set grepformat=%f:%l:%c:%k:%m
+  else
+    set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
+    set grepformat=%f:%l:%c:%m
+  endif
 endif
 
 "}}}
@@ -66,9 +71,9 @@ function! PackInit() abort
   call minpac#init()
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  " Additional plugins here.
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('tyru/open-browser.vim')
+  call minpac#add('thinca/vim-qfhl')
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
   call minpac#add('rbtnn/vim-ambiwidth')
