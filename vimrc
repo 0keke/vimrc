@@ -74,19 +74,23 @@ function! PackInit() abort
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('tyru/open-browser.vim')
   call minpac#add('thinca/vim-qfhl')
+  call minpac#add('rbtnn/vim-lsfiles')
+  call minpac#add('rbtnn/vim-qfjob')
+
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
   call minpac#add('rbtnn/vim-ambiwidth')
 
   call minpac#add('tyru/caw.vim')
   call minpac#add('machakann/vim-sandwich')
-
-  call minpac#add('kana/vim-operator-user')
+  call minpac#add('andymass/vim-matchup')
+  " call minpac#add('itchyny/vim-parenmatch')
 
   call minpac#add('kana/vim-operator-user')
   call minpac#add('kana/vim-textobj-user')
   call minpac#add('haya14busa/vim-operator-flashy')
 
+  call minpac#add('mattn/vim-molder')
   " call minpac#add('lambdalisue/fern-hijack.vim')
   call minpac#add('lambdalisue/fern-renderer-nerdfont.vim')
   call minpac#add('lambdalisue/fern.vim')
@@ -106,21 +110,10 @@ function! PackInit() abort
   " color scheme
   call minpac#add('NLKNguyen/papercolor-theme')
   call minpac#add('cocopon/iceberg.vim')
+  call minpac#add('gilgigilgil/anderson.vim')
+  call minpac#add('habamax/vim-habamax')
   call minpac#add('sainnhe/edge')
-  call minpac#add('EdenEast/nightfox.nvim')
-
-  " copmpletion
-  call minpac#add('prabirshrestha/asyncomplete.vim', {'type': 'opt'})
-  call minpac#add('prabirshrestha/asyncomplete-lsp.vim', {'type': 'opt'})
-
-  " Denops
-  call minpac#add('lambdalisue/gin.vim')
-  call minpac#add('lambdalisue/kensaku.vim')
-  call minpac#add('vim-denops/denops.vim')
-  call minpac#add('yuki-yano/fuzzy-motion.vim')
-
-  call minpac#add('junegunn/fzf')
-  call minpac#add('junegunn/fzf.vim')
+  call minpac#add('tomasr/molokai')
 endfunction
 
 function! s:ensure_minpac() abort
@@ -271,8 +264,8 @@ let g:lsp_settings = {
 let g:fern#hide_cursor = 1
 let g:fern#renderer = "nerdfont"
 let g:fern#renderer#nerdfont#indent_markers = 1
-nnoremap <Leader>ee <Cmd>Fern . -reveal=%:p<CR>
-nnoremap <Leader>EE <Cmd>Fern . -toggle -drawer -reveal=%<CR>
+command! FernCurrentFile Fern . -reveal=%:p
+command! FernDrawer Fern . -toggle -drawer -reveal=%
 
 augroup my-glyph-palette
   autocmd! *
@@ -280,44 +273,105 @@ augroup my-glyph-palette
 augroup END
 " }}}
 
-" FuzzyMotion: {{{
-nnoremap <Leader><Leader> <Cmd>FuzzyMotion<CR>
+" QfJob: {{{
+function s:iconv(text) abort
+    if has('win32') && exists('g:loaded_qficonv') && (len(a:text) < 500)
+        return qficonv#encoding#iconv_utf8(a:text, 'shift_jis')
+    else
+        return a:text
+    endif
+endfunction
 
-" Enable kensaku.vim matcher
-let g:fuzzy_motion_matchers = ['fzf', 'kensaku']
+if executable('git')
+    command! -nargs=*                                           GitGrep      :call s:gitgrep(<q-args>)
 
-" Disable word split feature
-let g:fuzzy_motion_word_filter_regexp_list = []
+    function! s:gitgrep(q_args) abort
+        let cmd = ['git', '--no-pager', 'grep', '--no-color', '-n', '--column'] + split(a:q_args, '\s\+')
+        call qfjob#start(cmd, {
+            \ 'title': 'git grep',
+            \ 'line_parser': function('s:gitgrep_line_parser'),
+            \ })
+    endfunction
+
+    function s:gitgrep_line_parser(line) abort
+        let m = matchlist(a:line, '^\(.\{-\}\):\(\d\+\):\(\d\+\):\(.*\)$')
+        if !empty(m)
+            let path = m[1]
+            if !filereadable(path) && (path !~# '^[A-Z]:')
+                let path = expand(fnamemodify(path, ':h') .. '/' .. m[1])
+            endif
+            return {
+                \ 'filename': s:iconv(path),
+                \ 'lnum': m[2],
+                \ 'col': m[3],
+                \ 'text': s:iconv(m[4]),
+                \ }
+        else
+            return { 'text': s:iconv(a:line), }
+        endif
+    endfunction
+endif
+
+if executable('rg')
+    command! -nargs=*                                           RipGrep      :call s:ripgrep(<q-args>)
+
+    function! s:ripgrep(q_args) abort
+        let cmd = ['rg', '--vimgrep', '--glob', '!.git', '--glob', '!.svn', '--glob', '!node_modules', '-uu'] + split(a:q_args, '\s\+') + (has('win32') ? ['.\'] : ['.'])
+        call qfjob#start(cmd, {
+            \ 'title': 'ripgrep',
+            \ 'line_parser': function('s:ripgrep_line_parser'),
+            \ })
+    endfunction
+
+    function s:ripgrep_line_parser(line) abort
+        let m = matchlist(a:line, '^\s*\(.\{-\}\):\(\d\+\):\(\d\+\):\(.*\)$')
+        if !empty(m)
+            let path = m[1]
+            if !filereadable(path) && (path !~# '^[A-Z]:')
+                let path = expand(fnamemodify(m[5], ':h') .. '/' .. m[1])
+            endif
+            return {
+                \ 'filename': s:iconv(path),
+                \ 'lnum': m[2],
+                \ 'col': m[3],
+                \ 'text': s:iconv(m[4]),
+                \ }
+        else
+            return { 'text': s:iconv(a:line), }
+        endif
+    endfunction
+endif
 " }}}
 
-" vim-qf-preview {{{
-
+" QfPreview: {{{
 augroup qfpreview
   autocmd!
   autocmd FileType qf nmap <buffer> p <plug>(qf-preview-open)
 augroup END
-
 " }}}
 
 " Gina: {{{
 " TODO: 2. gina.vim
-nnoremap <silent> <Leader>aa :<C-u>Gina status<CR>
-" nnoremap <silent> <Leader>aa :<C-u>GinaPreview<CR>
-nnoremap <silent> <Leader>aA :<C-u>Gina changes HEAD<CR>
-nnoremap <silent> <Leader>ac :<C-u>Gina commit<CR>
-nnoremap <silent> <Leader>aC :<C-u>Gina commit --amend<CR>
-nnoremap <silent> <Leader>ab :<C-u>Gina branch -av<CR>
-nnoremap <silent> <Leader>at :<C-u>Gina tag<CR>
-nnoremap <silent> <Leader>ag :<C-u>Gina grep<CR>
-nnoremap <silent> <Leader>aq :<C-u>Gina qrep<CR>
-nnoremap <silent> <Leader>ad :<C-u>Gina changes origin/HEAD...<CR>
-nnoremap <silent> <Leader>ah :<C-u>Gina log --graph<CR>
-nnoremap <silent> <Leader>aH :<C-u>Gina log --graph --all<CR>
-nnoremap <silent> <Leader>al :<C-u>Gina log<CR>
-nnoremap <silent> <Leader>aL :<C-u>Gina log :%<CR>
-nnoremap <silent> <Leader>af :<C-u>Gina ls<CR>
-nnoremap <silent> <Leader>ars :<C-u>Gina show <C-r><C-w><CR>
-nnoremap <silent> <Leader>arc :<C-u>Gina changes <C-r><C-w><CR>
+" nnoremap <silent> <Leader>aa :<C-u>Gina status<CR>
+command! GinaStatus Gina status
+" nnoremap <silent> <Leader>aA :<C-u>Gina changes HEAD<CR>
+" nnoremap <silent> <Leader>ac :<C-u>Gina commit<CR>
+" nnoremap <silent> <Leader>aC :<C-u>Gina commit --amend<CR>
+" nnoremap <silent> <Leader>ab :<C-u>Gina branch -av<CR>
+command! GinaBranch Gina branch -av
+" nnoremap <silent> <Leader>at :<C-u>Gina tag<CR>
+" nnoremap <silent> <Leader>ag :<C-u>Gina grep<CR>
+" nnoremap <silent> <Leader>aq :<C-u>Gina qrep<CR>
+" nnoremap <silent> <Leader>ad :<C-u>Gina changes origin/HEAD...<CR>
+" nnoremap <silent> <Leader>ah :<C-u>Gina log --graph<CR>
+command! Ginalog Gina log
+command! GinaLog Gina log -- %
+" nnoremap <silent> <Leader>aH :<C-u>Gina log --graph --all<CR>
+" nnoremap <silent> <Leader>al :<C-u>Gina log<CR>
+" nnoremap <silent> <Leader>aL :<C-u>Gina log :%<CR>
+" nnoremap <silent> <Leader>af :<C-u>Gina ls<CR>
+" nnoremap <silent> <Leader>ars :<C-u>Gina show <C-r><C-w><CR>
+" nnoremap <silent> <Leader>arc :<C-u>Gina changes <C-r><C-w><CR>
 "}}}
 
 " Misc:{{{
@@ -342,6 +396,7 @@ command! -nargs=0 Nohlsearch let @/ = ''
 "}}}
 
 " KeyMapping:{{{
+nnoremap <Space> <Cmd>LsFiles<CR>
 
 map H <Plug>(operator-quickhl-manual-this-motion)
 
@@ -378,8 +433,13 @@ if has('win32')
   tnoremap <silent><nowait><C-u> <Esc>
 endif
 
-nnoremap <silent><C-j> <Cmd>cnext \| normal zz<CR>
-nnoremap <silent><C-k> <Cmd>cprevious \| normal zz<CR>
+nnoremap <silent><C-n> <Cmd>cnext \| normal zz<CR>
+nnoremap <silent><C-p> <Cmd>cprevious \| normal zz<CR>
+
+nnoremap <silent><C-j> gt
+nnoremap <silent><C-k> gT
+tnoremap <C-j> <C-w>gt
+tnoremap <C-k> <C-w>gT
 
 " Grep with <Leader>gg {{{
 function! s:grep(bang, query) abort
@@ -390,7 +450,7 @@ function! s:grep(bang, query) abort
   endif
   execute printf('silent grep%s %s .', a:bang, escape(query, ' '))
 endfunction
-nnoremap <silent> <Leader>gg :<C-u>call <SID>grep('', '')<CR>
+" nnoremap <silent> <Leader>gg :<C-u>call <SID>grep('', '')<CR>
 command! -nargs=* -bang Grep call s:grep(<q-bang>, <q-args>)
 " }}}
 
