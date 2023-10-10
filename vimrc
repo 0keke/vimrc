@@ -74,9 +74,6 @@ function! PackInit() abort
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('tyru/open-browser.vim')
   call minpac#add('thinca/vim-qfhl')
-  call minpac#add('rbtnn/vim-lsfiles')
-  call minpac#add('rbtnn/vim-qfjob')
-
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
   call minpac#add('rbtnn/vim-ambiwidth')
@@ -273,76 +270,6 @@ augroup my-glyph-palette
 augroup END
 " }}}
 
-" QfJob: {{{
-function s:iconv(text) abort
-    if has('win32') && exists('g:loaded_qficonv') && (len(a:text) < 500)
-        return qficonv#encoding#iconv_utf8(a:text, 'shift_jis')
-    else
-        return a:text
-    endif
-endfunction
-
-if executable('git')
-    command! -nargs=*                                           GitGrep      :call s:gitgrep(<q-args>)
-
-    function! s:gitgrep(q_args) abort
-        let cmd = ['git', '--no-pager', 'grep', '--no-color', '-n', '--column'] + split(a:q_args, '\s\+')
-        call qfjob#start(cmd, {
-            \ 'title': 'git grep',
-            \ 'line_parser': function('s:gitgrep_line_parser'),
-            \ })
-    endfunction
-
-    function s:gitgrep_line_parser(line) abort
-        let m = matchlist(a:line, '^\(.\{-\}\):\(\d\+\):\(\d\+\):\(.*\)$')
-        if !empty(m)
-            let path = m[1]
-            if !filereadable(path) && (path !~# '^[A-Z]:')
-                let path = expand(fnamemodify(path, ':h') .. '/' .. m[1])
-            endif
-            return {
-                \ 'filename': s:iconv(path),
-                \ 'lnum': m[2],
-                \ 'col': m[3],
-                \ 'text': s:iconv(m[4]),
-                \ }
-        else
-            return { 'text': s:iconv(a:line), }
-        endif
-    endfunction
-endif
-
-if executable('rg')
-    command! -nargs=*                                           RipGrep      :call s:ripgrep(<q-args>)
-
-    function! s:ripgrep(q_args) abort
-        let cmd = ['rg', '--vimgrep', '--glob', '!.git', '--glob', '!.svn', '--glob', '!node_modules', '-uu'] + split(a:q_args, '\s\+') + (has('win32') ? ['.\'] : ['.'])
-        call qfjob#start(cmd, {
-            \ 'title': 'ripgrep',
-            \ 'line_parser': function('s:ripgrep_line_parser'),
-            \ })
-    endfunction
-
-    function s:ripgrep_line_parser(line) abort
-        let m = matchlist(a:line, '^\s*\(.\{-\}\):\(\d\+\):\(\d\+\):\(.*\)$')
-        if !empty(m)
-            let path = m[1]
-            if !filereadable(path) && (path !~# '^[A-Z]:')
-                let path = expand(fnamemodify(m[5], ':h') .. '/' .. m[1])
-            endif
-            return {
-                \ 'filename': s:iconv(path),
-                \ 'lnum': m[2],
-                \ 'col': m[3],
-                \ 'text': s:iconv(m[4]),
-                \ }
-        else
-            return { 'text': s:iconv(a:line), }
-        endif
-    endfunction
-endif
-" }}}
-
 " QfPreview: {{{
 augroup qfpreview
   autocmd!
@@ -396,7 +323,6 @@ command! -nargs=0 Nohlsearch let @/ = ''
 "}}}
 
 " KeyMapping:{{{
-nnoremap <Space> <Cmd>LsFiles<CR>
 
 map H <Plug>(operator-quickhl-manual-this-motion)
 
