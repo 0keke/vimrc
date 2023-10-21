@@ -10,7 +10,7 @@ scriptencoding utf-8
 
 let $XDG_CACHE_HOME = get(environ(), 'XDG_CACHE_HOME', expand('~/.cache'))
 let $VIMHOME = expand('<sfile>:p:h')
-let g:mapleader = "\<Space>"
+" let g:mapleader = "\<Space>"
 
 set winaltkeys=yes
 set guioptions=mM
@@ -276,6 +276,9 @@ map H <Plug>(operator-quickhl-manual-this-motion)
 
 map  <silent>y   <Plug>(operator-flashy)
 nmap <silent>Y   <Plug>(operator-flashy)$
+
+nnoremap <C-s>    <Cmd>GitDiffHistoryFirst<CR>
+nnoremap <Space>  <Cmd>LsFiles<CR>
 
 inoremap <C-u> <C-g>u<C-u>
 
