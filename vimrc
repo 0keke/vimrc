@@ -73,43 +73,35 @@ function! PackInit() abort
 
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('tyru/open-browser.vim')
-  call minpac#add('thinca/vim-qfhl')
 
   " https://twitter.com/mattn_jp/status/1526718582264320000
   call minpac#add('rbtnn/vim-ambiwidth')
+  call minpac#add('rbtnn/vim-qficonv')
 
   call minpac#add('tyru/caw.vim')
-  call minpac#add('machakann/vim-sandwich')
   call minpac#add('andymass/vim-matchup')
-  " call minpac#add('itchyny/vim-parenmatch')
 
   call minpac#add('kana/vim-operator-user')
   call minpac#add('kana/vim-textobj-user')
   call minpac#add('haya14busa/vim-operator-flashy')
 
   call minpac#add('mattn/vim-molder')
-  " call minpac#add('lambdalisue/fern-hijack.vim')
-  call minpac#add('lambdalisue/fern-renderer-nerdfont.vim')
-  call minpac#add('lambdalisue/fern.vim')
-  call minpac#add('lambdalisue/glyph-palette.vim')
-  call minpac#add('lambdalisue/nerdfont.vim')
 
   call minpac#add('mattn/vim-lsp-settings')
   call minpac#add('prabirshrestha/vim-lsp')
   call minpac#add('tsuyoshicho/vim-efm-langserver-settings')
 
   call minpac#add('t9md/vim-quickhl')
-  call minpac#add('lambdalisue/gina.vim')
-  call minpac#add('previm/previm')
   call minpac#add('ntpeters/vim-better-whitespace')
-  call minpac#add('bfrg/vim-qf-preview')
 
   " color scheme
   call minpac#add('NLKNguyen/papercolor-theme')
   call minpac#add('cocopon/iceberg.vim')
-  call minpac#add('gilgigilgil/anderson.vim')
-  call minpac#add('habamax/vim-habamax')
+  call minpac#add('lifepillar/vim-solarized8')
+  call minpac#add('nordtheme/vim')
+  call minpac#add('rhysd/vim-color-spring-night')
   call minpac#add('sainnhe/edge')
+  call minpac#add('sainnhe/everforest')
   call minpac#add('tomasr/molokai')
 endfunction
 
@@ -257,50 +249,6 @@ let g:lsp_settings = {
 
 "}}}
 
-" Fern: {{{
-let g:fern#hide_cursor = 1
-let g:fern#renderer = "nerdfont"
-let g:fern#renderer#nerdfont#indent_markers = 1
-command! FernCurrentFile Fern . -reveal=%:p
-command! FernDrawer Fern . -toggle -drawer -reveal=%
-
-augroup my-glyph-palette
-  autocmd! *
-    autocmd FileType fern call glyph_palette#apply()
-augroup END
-" }}}
-
-" QfPreview: {{{
-augroup qfpreview
-  autocmd!
-  autocmd FileType qf nmap <buffer> p <plug>(qf-preview-open)
-augroup END
-" }}}
-
-" Gina: {{{
-" TODO: 2. gina.vim
-" nnoremap <silent> <Leader>aa :<C-u>Gina status<CR>
-command! GinaStatus Gina status
-" nnoremap <silent> <Leader>aA :<C-u>Gina changes HEAD<CR>
-" nnoremap <silent> <Leader>ac :<C-u>Gina commit<CR>
-" nnoremap <silent> <Leader>aC :<C-u>Gina commit --amend<CR>
-" nnoremap <silent> <Leader>ab :<C-u>Gina branch -av<CR>
-command! GinaBranch Gina branch -av
-" nnoremap <silent> <Leader>at :<C-u>Gina tag<CR>
-" nnoremap <silent> <Leader>ag :<C-u>Gina grep<CR>
-" nnoremap <silent> <Leader>aq :<C-u>Gina qrep<CR>
-" nnoremap <silent> <Leader>ad :<C-u>Gina changes origin/HEAD...<CR>
-" nnoremap <silent> <Leader>ah :<C-u>Gina log --graph<CR>
-command! Ginalog Gina log
-command! GinaLog Gina log -- %
-" nnoremap <silent> <Leader>aH :<C-u>Gina log --graph --all<CR>
-" nnoremap <silent> <Leader>al :<C-u>Gina log<CR>
-" nnoremap <silent> <Leader>aL :<C-u>Gina log :%<CR>
-" nnoremap <silent> <Leader>af :<C-u>Gina ls<CR>
-" nnoremap <silent> <Leader>ars :<C-u>Gina show <C-r><C-w><CR>
-" nnoremap <silent> <Leader>arc :<C-u>Gina changes <C-r><C-w><CR>
-"}}}
-
 " Misc:{{{
 " Ref: https://github.com/koron/vim-kaoriya/blob/master/kaoriya/vim/plugins/kaoriya/plugin/cmdex.vim
 " :Scratch
@@ -323,7 +271,7 @@ command! -nargs=0 Nohlsearch let @/ = ''
 "}}}
 
 " KeyMapping:{{{
-
+let g:caw_operator_keymappings = 1
 map H <Plug>(operator-quickhl-manual-this-motion)
 
 map  <silent>y   <Plug>(operator-flashy)
@@ -351,13 +299,20 @@ endfunction
 " http://baqamore.hatenablog.com/entry/2016/07/07/201856
 xnoremap <expr> p printf('pgv"%sygv<esc>', v:register)
 
-if has('win32')
-  tnoremap <silent><nowait><C-b> <Left>
-  tnoremap <silent><nowait><C-f> <Right>
-  tnoremap <silent><nowait><C-e> <End>
-  tnoremap <silent><nowait><C-a> <Home>
-  tnoremap <silent><nowait><C-u> <Esc>
+if has('win32') && (&shell =~# '\<cmd\.exe$')
+  tnoremap <silent><C-p> <Up>
+  tnoremap <silent><C-n> <Down>
+  tnoremap <silent><C-b> <Left>
+  tnoremap <silent><C-f> <Right>
+  tnoremap <silent><C-e> <End>
+  tnoremap <silent><C-a> <Home>
+  tnoremap <silent><C-u> <Esc>
 endif
+
+cnoremap <C-b> <Left>
+cnoremap <C-f> <Right>
+cnoremap <C-e> <End>
+cnoremap <C-a> <Home>
 
 nnoremap <silent><C-n> <Cmd>cnext \| normal zz<CR>
 nnoremap <silent><C-p> <Cmd>cprevious \| normal zz<CR>
@@ -387,7 +342,7 @@ syntax enable
 filetype plugin indent on
 
 try
-  colorscheme iceberg
+  colorscheme everforest
 catch
   colorscheme habamax
 endtry
