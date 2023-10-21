@@ -27,6 +27,5 @@ tags
 [._]*.un~
 
 # Local package
-pack/local/
-pack/personal/
-pack/minpac/
+pack/*
+!pack/personal/
